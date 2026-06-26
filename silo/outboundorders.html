@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silo — Outboundorders — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">06.4 · Silo</div>
+      <h1>Outboundorders</h1>
+      <div class="subtitle">Beheer en verwerking van uitgaande orders vanuit de silo</div>
+    </div>
+
+    <div class="section">
+      <h2>Orderbronnen</h2>
+      <p>Outboundorders kunnen op twee manieren ontstaan:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Bron</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>AXI → ATUMIND</strong></td>
+            <td>Externe orders worden vanuit AXI doorgestuurd naar ATUMIND via de interface</td>
+          </tr>
+          <tr>
+            <td><strong>Intern WMS</strong></td>
+            <td>Interne orders worden manueel aangemaakt in het WMS, bv. voor interne controle of kwaliteitscheck</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Orderstructuur</h2>
+
+      <h3>Orderhoofd</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Veld</th><th>Type</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">referentie</span></td>
+            <td>Tekst</td>
+            <td>Unieke orderreferentie vanuit AXI of intern aangemaakt</td>
+          </tr>
+          <tr>
+            <td><span class="code">verwachte_uitvoerdatum</span></td>
+            <td>Datum</td>
+            <td>Geplande datum waarop het order uitgevoerd dient te worden</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Orderlijnen</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Veld</th><th>Type</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">product/variant</span></td>
+            <td>Referentie</td>
+            <td>Product en variant die op deze orderlijn gevraagd worden</td>
+          </tr>
+          <tr>
+            <td><span class="code">gewenst_volume</span></td>
+            <td>Decimaal (kg)</td>
+            <td>Gevraagd gewicht voor deze orderlijn. Volumeaanvraag verloopt primair via gewicht.</td>
+          </tr>
+          <tr>
+            <td><span class="code">reserveringstype</span></td>
+            <td>Enum</td>
+            <td>
+              <span class="code">FEFO_STRIKT</span> — reservatie strikt volgens First Expired First Out<br>
+              <span class="code">FEFO_BATCH</span> — reservatie per batch, FEFO bij benadering
+            </td>
+          </tr>
+          <tr>
+            <td><span class="code">max_ouderdom</span></td>
+            <td>Geheel getal (dagen)</td>
+            <td>Maximale ouderdom van stock die voor deze lijn gereserveerd mag worden</td>
+          </tr>
+          <tr>
+            <td><span class="code">laadvolgorde</span></td>
+            <td>Geheel getal</td>
+            <td>Gewenste volgorde bij verlading. Mag leeg gelaten worden of nadien aangevuld worden.</td>
+          </tr>
+          <tr>
+            <td><span class="code">cnt_nrs</span></td>
+            <td>Lijst</td>
+            <td>Optioneel — expliciete CNT-nummers die zeker op dit order moeten worden meegenomen</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Reservatielogica</h2>
+      <p>
+        Reservaties worden uitsluitend gedaan uit de zones <span class="code">LOX</span> en <span class="code">LOX_M</span>. Zone <span class="code">LOX_S</span> valt buiten de reservatiescope.
+      </p>
+      <p>
+        Na reservatie wordt het gereserveerde volume teruggekoppeld naar <strong>AXI via de interface</strong>.
+      </p>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p>Bij onvoldoende beschikbare stock voor een reservatie wordt een <strong>tekortenmelding</strong> gegenereerd in het WMS. Deze melding is zichtbaar voor de key-user maar wordt niet doorgegeven naar AXI.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Orderstatussen &amp; workflow</h2>
+      <p>Een order doorloopt de volgende statussen. Per status kunnen taken worden aangemaakt om de uitvoering te ondersteunen.</p>
+      <div class="status-flow">
+        <div class="status-step">
+          <div class="status-label">Gecreëerd</div>
+          <div class="status-desc">Order is aangemaakt in het WMS of ontvangen vanuit AXI. Nog geen reservatie actief.</div>
+        </div>
+        <div class="status-arrow">↓</div>
+        <div class="status-step">
+          <div class="status-label">Reserveren</div>
+          <div class="status-desc">Systeem reserveert stock op basis van de orderlijnen. Vrijgave gebeurt automatisch X dagen voor verwachte uitvoerdatum (instelbaar) of manueel door key-user.</div>
+        </div>
+        <div class="status-arrow">↓</div>
+        <div class="status-step status-confirm">
+          <div class="status-label">Bevestiging key-user</div>
+          <div class="status-desc">Na reservatie dient een key-user het order expliciet te bevestigen alvorens het in voorbereiding kan gaan.</div>
+        </div>
+        <div class="status-arrow">↓</div>
+        <div class="status-step">
+          <div class="status-label">Voorbereiden</div>
+          <div class="status-desc">Paletten worden verplaatst naar voorbereidingslocaties nabij de lift. Ordervoorbereiding is actief.</div>
+        </div>
+        <div class="status-arrow">↓</div>
+        <div class="status-step">
+          <div class="status-label">Uithalen</div>
+          <div class="status-desc">Paletten worden effectief uitgehaald en aangeboden aan de laadzone.</div>
+        </div>
+      </div>
+
+      <h3>Vrijgaveparameter</h3>
+      <table class="data-table" style="margin-top:12px;">
+        <thead>
+          <tr><th>Parameter</th><th>Omschrijving</th><th>Instelbaar door</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">vrijgave_dagen_op_voorhand</span></td>
+            <td>Aantal dagen voor de verwachte uitvoerdatum waarop een order automatisch in reservatie gaat</td>
+            <td>Key-user</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Orderbeheer</h2>
+      <p>Orders kunnen na aanmaak nog worden aangepast of geannuleerd, zolang de status dit toelaat. Bij annulatie worden gereserveerde CNT's vrijgegeven.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Actie</th><th>Beschikbaar in status</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Aanpassen</td>
+            <td>Gecreëerd, Reserveren</td>
+          </tr>
+          <tr>
+            <td>Annuleren</td>
+            <td>Gecreëerd, Reserveren, Voorbereiden</td>
+          </tr>
+          <tr>
+            <td>Manueel vrijgeven voor reservatie</td>
+            <td>Gecreëerd</td>
+          </tr>
+          <tr>
+            <td>Bevestigen (key-user)</td>
+            <td>Reserveren — na voltooide reservatie</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+	<div class="section">
+      <h2>AXI interface — orderupdates</h2>
+      <p>
+        De communicatie tussen AXI en ATUMIND is bidirectioneel. Naast het aanmaken van orders vanuit AXI zijn ook updates en terugkoppelingen voorzien.
+      </p>
+
+      <h3>Van AXI naar ATUMIND</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Actie</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Order aanmaken</td>
+            <td>Nieuw order met hoofd en orderlijnen wordt doorgestuurd naar ATUMIND</td>
+          </tr>
+          <tr>
+            <td>Order aanpassen</td>
+            <td>Wijzigingen aan een bestaand order (lijnen, volume, datum) worden doorgegeven zolang de status dit toelaat</td>
+          </tr>
+          <tr>
+            <td>Order annuleren</td>
+            <td>Annulatie wordt doorgestuurd — ATUMIND geeft gereserveerde CNT's vrij</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Van ATUMIND naar AXI</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Moment</th><th>Wat wordt teruggekoppeld</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Na reservatie</td>
+            <td>Gereserveerde CNT's en volumes worden teruggekoppeld naar AXI</td>
+          </tr>
+          <tr>
+            <td>Na bevestiging key-user</td>
+            <td>Bevestigde reservering wordt teruggekoppeld naar AXI</td>
+          </tr>
+          <tr>
+            <td>Tijdens uitvoering</td>
+            <td>Aanpassingen in uitvoering worden teruggekoppeld, bv. wanneer een taak onuitvoerbaar is en een nieuwe taak wordt aangevraagd. Het order in AXI blijft zo gesynchroniseerd met de werkelijke uitvoering in ATUMIND.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Alle statuswijzigingen en aanpassingen die de reservatie of uitvoering van een order beïnvloeden worden steeds teruggekoppeld naar AXI, zodat beide systemen consistent blijven.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .status-flow {
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+  .status-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+  }
+  .status-step.status-confirm {
+    border-left-color: var(--warn);
+    background: var(--warn-dim);
+  }
+  .status-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .status-confirm .status-label { color: var(--warn); }
+  .status-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .status-arrow {
+    text-align: left;
+    padding-left: 20px;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1.4;
+  }
+</style>
+
+</body>
+</html>

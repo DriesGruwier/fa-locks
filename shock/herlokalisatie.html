@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Herlokalisatie — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.2 · Shock</div>
+      <h1>Herlokalisatie &amp; ordervoorbereiding</h1>
+      <div class="subtitle">Batching, opstapeling en voorbereiding van paletten voor uitstroom naar de silo</div>
+    </div>
+
+    <div class="section">
+      <h2>Doel</h2>
+      <p>
+        Wanneer paletten voldoende tijd in de shockvriezer hebben doorgebracht, worden ze gegroepeerd per <strong>product/variant</strong> en voorbereid voor uitstroom naar de silo. Dit proces — herlokalisatie of ordervoorbereiding — omvat het samenvoegen van paletten tot geoptimaliseerde eindpaletten, het correct positioneren in de lanes en het vrijmaken van capaciteit voor nieuwe inbound.
+      </p>
+      <p>
+        Elke eindpallet bevat uitsluitend paletten van <strong>één product/variant</strong>. Menging van varianten op een eindpallet is niet toegestaan.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Batchinglogica</h2>
+      <p>
+        Paletten worden gebatched na een <strong>instelbare wachttijd</strong> in de shockvriezer. De batchinglogica werkt met twee modi die automatisch worden toegepast naargelang de situatie:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Modus</th><th>Trigger</th><th>Gedrag</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Standaard batch</strong></td>
+            <td>Na instelbare wachttijd X</td>
+            <td>Batch wordt samengesteld op <strong>80% van het maximaal aantal lagen</strong> (instelbaar). Geeft voorkeur aan vollere eindpaletten.</td>
+          </tr>
+          <tr>
+            <td><strong>Urgente batch</strong></td>
+            <td>Pallet nadert diepvriestijd en is nog niet toegewezen aan een batch</td>
+            <td>Pallet wordt alsnog gebatched, ook als de batch kleiner uitvalt dan 80%. Voorkomt dat paletten de vrieszone verlaten zonder voorbereiding.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Opstapelingsparameters</h2>
+      <p>Bij het samenstellen van een eindpallet worden de volgende parameters in rekening gebracht:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Parameter</th><th>Omschrijving</th><th>Instelbaar</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">gewicht_eindpallet</span></td>
+            <td>Gewenst gewicht van de eindpallet, tevens het maximum. Wordt niet overschreden.</td>
+            <td>Ja — per product/variant</td>
+          </tr>
+          <tr>
+            <td><span class="code">max_lagen</span></td>
+            <td>Maximaal aantal lagen opstapeling op de eindpallet.</td>
+            <td>Ja — per product/variant</td>
+          </tr>
+         <tr>
+            <td><span class="code">batch_fill_pct</span></td>
+            <td>Percentage van max lagen dat nagestreefd wordt bij standaard batching (standaard 80%).</td>
+            <td>Ja — intern WMS, globaal</td>
+          </tr>
+          <tr>
+            <td><span class="code">batch_wachttijd</span></td>
+            <td>Tijd na inbound waarna een pallet in aanmerking komt voor standaard batching.</td>
+            <td>Ja — intern WMS, globaal</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>De logica streeft ernaar bij een uithaalopdracht <strong>zo hoog mogelijk te stapelen</strong> en zo weinig mogelijk restflow te genereren.</p>
+    </div>
+
+    <div class="section">
+      <h2>Restflow — terugkeer naar shock</h2>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p>Paletten die na batching <strong>lager dan 1,40m</strong> zijn worden teruggeplaatst in de shockvriezer. Ze komen later opnieuw in aanmerking voor een volgende batch van dezelfde product/variant. De logica minimaliseert actief het aantal restpaletten onder deze drempel.</p>
+      </div>
+      <p>Paletten van 1,40m of hoger gaan altijd mee naar de silo, ook als ze niet volledig gevuld zijn.</p>
+    </div>
+
+    <div class="section">
+      <h2>Locatiestrategie &amp; lanevolgorde</h2>
+      <p>
+        Herlokalisatielocaties worden zo ingericht dat bij uitname de <strong>meest urgente pallet vooraan</strong> in de lane staat en de laatste pallet achteraan. Dit principe geldt over de drie niveaus heen.
+      </p>
+      <p>
+        Op die manier komen bij uitname lanes zo snel mogelijk volledig vrij, wat nieuwe inbound-capaciteit creëert zonder dat er resterende paletten een lane blokkeren.
+      </p>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Lanes die volledig gevuld zijn en klaar zijn voor ordervoorbereiding krijgen eerst status <span class="code">RELOC</span>. Pas daarna worden ze actief meegenomen in de herlokalisatietaken.</p>
+      </div>
+      <p>
+        De volgorde voor de opstapelingsrobot is gegarandeerd: paletten worden in de juiste volgorde aangeboden langs de uithaalkant van de lane, zodat de robot steeds de correcte laagvolgorde krijgt per product/variant.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Timing &amp; activatievenster</h2>
+      <p>
+        Herlokalisatietaken worden geïnitieerd binnen een <strong>instelbaar tijdsvenster</strong>. Buiten dit venster worden geen nieuwe taken aangemaakt.
+      </p>
+      <p>Een herlokalisatietaak voor een bepaald level wordt enkel gestart als aan beide voorwaarden voldaan is:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Voorwaarde</th><th>Toelichting</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Geen actieve inbound op dit level</td>
+            <td>Voorkomt conflicten met lopende inboundingsbewegingen op hetzelfde level</td>
+          </tr>
+          <tr>
+            <td>Geen actieve outbound op dit level</td>
+            <td>Voorkomt conflicten met lopende uitnamebewegingen op hetzelfde level</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

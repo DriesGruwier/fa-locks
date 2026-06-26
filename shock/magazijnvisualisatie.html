@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Magazijnvisualisatie — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.4 · Shock</div>
+      <h1>Magazijnvisualisatie &amp; operator</h1>
+      <div class="subtitle">Visuele weergave van de shockvriezer en operatorfunctionaliteiten</div>
+    </div>
+
+    <div class="section">
+      <h2>Visualisatie</h2>
+      <p>
+        De shockvriezer wordt real-time visueel weergegeven. De visualisatie toont de volledige lay-out over de drie niveaus heen, inclusief de bewegende elementen.
+      </p>
+      <h3>Weergegeven elementen</h3>
+      <table class="data-table">
+        <thead>
+          <tr><th>Element</th><th>Weergave</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Paletten in lanes</td>
+            <td>Positie per lane en level, gekleurd per toegewezen opdracht (zie palletkleuren)</td>
+          </tr>
+          <tr>
+            <td>Shuttlebewegingen</td>
+            <td>Real-time positie en richting van de shuttles per level</td>
+          </tr>
+          <tr>
+            <td>Paletten op conveyors</td>
+            <td>Positie op de conveyor met palletdata (SSCC, product/variant, status)</td>
+          </tr>
+          <tr>
+            <td>Lanes</td>
+            <td>Gekleurd per lanestatus (zie lanekleuren)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Lanekleuren</h2>
+      <p>Elke lane wordt gekleurd weergegeven op basis van de huidige status:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Status</th><th>Kleur</th><th>Betekenis</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">INBOUND</span></td>
+            <td><span class="color-dot" style="background:#22c55e"></span> Groen</td>
+            <td>Lane beschikbaar voor inbounding</td>
+          </tr>
+          <tr>
+            <td><span class="code">RELOC</span></td>
+            <td><span class="color-dot" style="background:#f59e0b"></span> Oranje</td>
+            <td>Lane in ordervoorbereiding / herlokalisatie</td>
+          </tr>
+          <tr>
+            <td><span class="code">OUTBOUND</span></td>
+            <td><span class="color-dot" style="background:#3b82f6"></span> Blauw</td>
+            <td>Lane actief in uitstroom</td>
+          </tr>
+          <tr>
+            <td><span class="code">GEBLOKKEERD</span></td>
+            <td><span class="color-dot" style="background:#ef4444"></span> Rood</td>
+            <td>Lane geblokkeerd — geen operaties toegestaan</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Palletkleuren</h2>
+      <p>Individuele paletten worden gekleurd weergegeven op basis van de toegewezen opdracht:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Opdracht</th><th>Kleur</th><th>Betekenis</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Geen opdracht</td>
+            <td><span class="color-dot" style="background:#94a3b8"></span> Grijs</td>
+            <td>Pallet in rust, geen actieve taak toegewezen</td>
+          </tr>
+          <tr>
+            <td>Inbound</td>
+            <td><span class="color-dot" style="background:#22c55e"></span> Groen</td>
+            <td>Pallet wordt ingebounded</td>
+          </tr>
+          <tr>
+            <td>Herlokalisatie</td>
+            <td><span class="color-dot" style="background:#f59e0b"></span> Oranje</td>
+            <td>Pallet wordt herplaatst in kader van ordervoorbereiding</td>
+          </tr>
+          <tr>
+            <td>Outbound</td>
+            <td><span class="color-dot" style="background:#3b82f6"></span> Blauw</td>
+            <td>Pallet staat klaar voor of is in uitstroom</td>
+          </tr>
+          <tr>
+            <td>Reject</td>
+            <td><span class="color-dot" style="background:#ef4444"></span> Rood</td>
+            <td>Pallet wordt via rejectflow naar buiten gestuurd</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Operatorfunctionaliteiten</h2>
+
+      <h3>Pallet toevoegen</h3>
+      <p>
+        Een operator kan via het scherm een pallet manueel toevoegen aan de shockvriezer. Bij het toevoegen wordt een <strong>SSCC</strong> ingegeven. Het systeem controleert vervolgens of de pallet bekend is in het WMS:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Situatie</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>SSCC bekend in WMS</td>
+            <td>Pallet wordt aangemeld en verwerkt via de normale plaatsingslogica</td>
+          </tr>
+          <tr>
+            <td>SSCC onbekend in WMS</td>
+            <td>Pallet wordt automatisch via de <strong>rejectflow</strong> naar buiten gestuurd. De rejectflow gebruikt dezelfde conveyor als de productiestroom — beide kunnen niet gelijktijdig actief zijn.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Pallet wegnemen</h3>
+      <p>
+        Operatoren met het vereiste autorisatieniveau kunnen een pallet manueel uit de shockvriezer verwijderen via het scherm. Elke wegname wordt gelogd met tijdstip, operator en betrokken pallet. Dit laat toe afwijkingen achteraf te traceren.
+      </p>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p><strong>Autorisatie vereist.</strong> Het wegnemen van paletten is voorbehouden aan operatoren met een verhoogd toegangsniveau. Standaardoperatoren hebben deze functie niet beschikbaar.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+
+</body>
+</html>

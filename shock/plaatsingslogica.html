@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Plaatsingslogica — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.1 · Shock</div>
+      <h1>Plaatsingslogica</h1>
+      <div class="subtitle">Logica voor automatische inbounding van paletten in de shockvriezer</div>
+    </div>
+
+    <div class="section">
+      <h2>Locatiestatussen</h2>
+      <p>Elke locatie in de shockvriezer krijgt een status toegewezen die bepaalt welke operaties erop mogen worden uitgevoerd.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Status</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">INBOUND</span></td>
+            <td>Locatie is beschikbaar voor inbounding van nieuwe paletten</td>
+          </tr>
+          <tr>
+            <td><span class="code">HERLOKALISATIE</span></td>
+            <td>Locatie is gereserveerd voor herplaatsing van bestaande paletten (ordervoorbereiding)</td>
+          </tr>
+          <tr>
+            <td><span class="code">OUTBOUND</span></td>
+            <td>Locatie is aangeduid voor uitname van paletten richting silo of expeditie</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Inbounding gebeurt uitsluitend op locaties met status <span class="code">INBOUND</span>.</p>
+    </div>
+
+    <div class="section">
+      <h2>Stroomprioriteit</h2>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p><strong>Expeditie heeft altijd voorrang op productie.</strong> De twee stromen zijn nooit gelijktijdig actief. Wanneer een expeditiestroom actief is, wordt de productiestroom geblokkeerd totdat de expeditieflow volledig is afgehandeld.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Stroom 1 — Expeditiestroom</h2>
+      <p>Paletten komen aan vanuit expeditie en moeten zo snel mogelijk worden ingebounded. De focus ligt op maximale doorvoer.</p>
+
+      <h3>Inboundingsstrategie</h3>
+      <p>Paletten worden <strong>alternerend over de drie levels</strong> geplaatst (1 → 2 → 3 → 1 → 2 → 3 → …) om de beschikbare capaciteit gelijkmatig te benutten. Er wordt uitsluitend ingebounded naar locaties met status <span class="code">INBOUND</span>.</p>
+
+      <h3>Tijdsvensters</h3>
+      <p>Paletten worden gegroepeerd op <strong>gewenste uithaaltijd</strong> (aangeleverd vanuit AXI bij aanmelding). De logica groepeert in instelbare blokken van 2 uur. Als plaatsing in het gewenste blok niet mogelijk is, wordt uitgeweken naar een groter blok.</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Poging</th><th>Blokgrootte</th><th>Opmerking</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>1</td><td>2 uur</td><td>Standaard — instelbaar</td></tr>
+          <tr><td>2</td><td>4 uur</td><td>Fallback bij onvoldoende beschikbaarheid</td></tr>
+          <tr><td>3</td><td>6 uur</td><td>Verdere fallback</td></tr>
+          <tr><td>…</td><td>+ 2 uur per stap</td><td>Stapgewijs uitbreiden</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Outbound geblokkeerd</h3>
+      <div class="info-block" style="border-left-color: var(--red);">
+        <p>Tijdens een actieve expeditiestroom is <strong>outbound niet mogelijk</strong>. Shuttle 1 en de lift zijn volledig in gebruik voor de inboundingsstroom. Outbound wordt hervat zodra de expeditiestroom is afgerond.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Stroom 2 — Productiestroom</h2>
+      <p>Paletten komen aan vanuit productie. Deze stroom is enkel actief wanneer er geen expeditiestroom loopt.</p>
+
+	<h3>Levelprioriteit</h3>
+      <p>De shockvriezer bestaat uit 3 niveaus. Alle paletten komen fysiek binnen op <strong>level 1</strong> via shuttle 1. Voor plaatsing op level 2 en 3 worden shuttle 2 en 3 ingeschakeld — dit vereist twee shuttlebewegingen. Plaatsing op level 1 vraagt slechts één shuttlebeweging (enkel shuttle 1).</p>
+      <p>Door te starten op level 2 en 3 worden shuttle 2 en 3 direct ingezet terwijl shuttle 1 nog bezig is met de aanvoer. Dit maximaliseert de gelijktijdige shuttlebezetting. Level 1 komt als derde aan bod in de rotatie, niet omdat het vermeden wordt, maar omdat de andere levels eerder worden aangesproken.</p>
+      <div class="level-sequence">
+        <div class="level-step">
+          <div class="level-num">1e</div>
+          <div class="level-label">Level 2</div>
+          <div class="level-note">Shuttle 2 + 3 actief — shuttle 1 vrij voor aanvoer</div>
+        </div>
+        <div class="level-arrow">→</div>
+        <div class="level-step">
+          <div class="level-num">2e</div>
+          <div class="level-label">Level 3</div>
+          <div class="level-note">Shuttle 2 + 3 actief — shuttle 1 vrij voor aanvoer</div>
+        </div>
+        <div class="level-arrow">→</div>
+        <div class="level-step">
+          <div class="level-num">3e</div>
+          <div class="level-label">Level 1</div>
+          <div class="level-note">Shuttle 1 plaatst direct — geen lift nodig</div>
+        </div>
+      </div>
+      <p>De rotatie herhaalt cyclisch: 2 → 3 → 1 → 2 → 3 → 1 → …</p>
+	  
+	      <div class="section">
+      <h2>Diepvriespaletten — directe doorstroom</h2>
+      <p>
+        Paletten die bij aanmelding reeds de status <span class="code">DIEPVRIES</span> dragen zijn al bevroren en hebben geen vriestijd nodig in de shockvriezer. Ze worden toch ingebounded op een locatie met status <span class="code">INBOUND</span>, maar met een bijzondere tijdsinstelling.
+      </p>
+      <div class="info-block" style="border-left-color: var(--green);">
+        <p>De <strong>voorspelde uithaaltijd wordt ingesteld op het huidige moment</strong>. Hierdoor vallen deze paletten onmiddellijk in het eerste tijdsvenster en worden ze direct meegenomen in de outbound voorbereiding en herlokalisatie.</p>
+      </div>
+      <p>
+        Dit mechanisme zorgt ervoor dat diepvriespaletten zonder manuele tussenkomst de normale plaatsings- en voorbereidingslogica doorlopen, maar met absolute prioriteit op uithaaltijd.
+      </p>
+    </div>
+
+      <h3>Tijdsvensters</h3>
+      <p>Paletten worden gegroepeerd op <strong>gewenste uithaaltijd</strong> aangeleverd vanuit AXI. Dezelfde bloklogica van 2 uur (instelbaar) met dezelfde fallback-stappen als de expeditiestroom is van toepassing.</p>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .level-sequence {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+  }
+  .level-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    box-shadow: var(--shadow);
+    min-width: 150px;
+  }
+  .level-num {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    margin-bottom: 3px;
+  }
+  .level-label {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .level-note {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .level-arrow {
+    font-size: 18px;
+    color: var(--text-muted);
+  }
+</style>
+
+</body>
+</html>

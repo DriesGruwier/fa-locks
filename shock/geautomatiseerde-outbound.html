@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Geautomatiseerde outbound — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.3 · Shock</div>
+      <h1>Geautomatiseerde outbound</h1>
+      <div class="subtitle">Automatische uitstroom van voorbereide paletten naar de opstapelrobot</div>
+    </div>
+
+    <div class="section">
+      <h2>Doel</h2>
+      <p>
+        De geautomatiseerde outbound stuurt paletten die de herlokalisatiefase hebben doorlopen en de status <span class="code">DIEPVRIES</span> hebben gekregen in de voorbereide volgorde naar de conveyor van de opstapelrobot. De robot stapelt deze paletten op tot nieuwe eindpaletten.
+      </p>
+      <p>
+        Wanneer een lane volledig leeg is na outbound wordt deze automatisch teruggezet naar status <span class="code">INBOUND</span> en is ze opnieuw beschikbaar voor nieuwe paletten.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Activatievenster</h2>
+      <p>
+        De geautomatiseerde outbound is enkel actief binnen een <strong>instelbaar tijdsvenster</strong>. Buiten dit venster worden geen outboundtaken aangemaakt. Dit laat toe de outbound te beperken tot operationeel relevante uren (bv. wanneer de opstapelrobot bemand of actief is).
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Parameter</th><th>Omschrijving</th><th>Instelbaar door</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">outbound_venster_start</span></td>
+            <td>Starttijd van het actieve outboundvenster</td>
+            <td>Key-user — intern WMS</td>
+          </tr>
+          <tr>
+            <td><span class="code">outbound_venster_einde</span></td>
+            <td>Eindtijd van het actieve outboundvenster</td>
+            <td>Key-user — intern WMS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Uitstuurvolgorde</h2>
+      <p>
+        Paletten worden uitgestuurd in de volgorde zoals bepaald tijdens de herlokalisatie- en ordervoorbereidingsfase. De voorbereide lanevolgorde wordt strikt gevolgd zodat de opstapelrobot de paletten in de correcte laagvolgorde per product/variant ontvangt.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Prioriteit inbound vs. outbound</h2>
+      <p>
+        Inbound en outbound kunnen gelijktijdig actief zijn op verschillende lanes. De prioriteit wordt bepaald door de bezettingsgraad van de shockvriezer:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Situatie</th><th>Prioriteit</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Voldoende vrije capaciteit beschikbaar</td>
+            <td><strong>Inbound</strong> heeft prioriteit. Outbound loopt parallel waar mogelijk.</td>
+          </tr>
+          <tr>
+            <td>Bezetting boven instelbare drempelwaarde</td>
+            <td><strong>Outbound</strong> krijgt prioriteit om capaciteit vrij te maken voor nieuwe inbound.</td>
+          </tr>
+        </tbody>
+      </table>
+      <table class="data-table">
+        <thead>
+          <tr><th>Parameter</th><th>Omschrijving</th><th>Instelbaar door</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">outbound_prioriteit_drempel</span></td>
+            <td>Bezettingspercentage waarboven outbound prioriteit krijgt op inbound</td>
+            <td>Key-user — intern WMS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Lane vrijgave na outbound</h2>
+      <p>
+        Zodra een lane volledig leeg is na uitstroom wordt deze automatisch vrijgegeven voor inbound. Er is geen manuele tussenkomst vereist. Dit zorgt voor een continue rotatie van lanes tussen inbound- en outboundgebruik.
+      </p>
+      <div class="info-block" style="border-left-color: var(--green);">
+        <p>Een lege lane krijgt automatisch status <span class="code">INBOUND</span> en is onmiddellijk beschikbaar voor nieuwe paletten.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

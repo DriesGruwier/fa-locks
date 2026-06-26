@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Algemene Data — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+<div class="page-header">
+      <div class="eyebrow">04 · Algemene data</div>
+      <h1>Algemene data &amp; masterdata</h1>
+      <div class="subtitle">Fundamentele databouwstenen van het WMS/WCS systeem</div>
+    </div>
+
+    <!-- Bestemmingen -->
+    <div class="section">
+      <h2>Bestemmingen (warehouse zones)</h2>
+      <p>
+        Paletten worden aangemeld bij het WMS voor twee actieve zones. ATUMIND hanteert hiervoor het concept <em>warehouse_zone</em> of een equivalent. Daarnaast bestaat een manuele zone die niet via het aanmeldproces wordt aangesproken.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Zone</th>
+            <th>Omschrijving</th>
+            <th>Aanmelding via WMS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">LOX</span></td>
+            <td>Hoofdzone — geautomatiseerd gedeelte</td>
+            <td><span class="badge-yes">Ja</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">LOX_S</span></td>
+            <td>Subzone — geautomatiseerd gedeelte</td>
+            <td><span class="badge-yes">Ja</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">LOX_M</span></td>
+            <td>Manueel gedeelte</td>
+            <td><span class="badge-no">Nee</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note-text">
+        LOX_M wordt niet actief aangemeld via het WMS maar is wel gekend in het systeem voor stockbeheer en statusinformatie.
+      </p>
+    </div>
+
+    <!-- Producten -->
+    <div class="section">
+      <h2>Producten</h2>
+      <p>
+        Producten worden geïdentificeerd via de combinatie <strong>Product / Variant</strong>. Bij aanmelding wordt tevens een leesbare beschrijving meegegeven zodat het product herkenbaar is voor de operator in het WMS-interface.
+      </p>
+      <div class="field-grid">
+        <div class="field-card">
+          <div class="field-name">Product</div>
+          <div class="field-desc">Productcode vanuit AXI</div>
+          <div class="field-source">AXI → WMS</div>
+        </div>
+        <div class="field-card">
+          <div class="field-name">Variant</div>
+          <div class="field-desc">Productvariatie (bv. gewichtsklasse, verpakking)</div>
+          <div class="field-source">AXI → WMS</div>
+        </div>
+        <div class="field-card">
+          <div class="field-name">Beschrijving</div>
+          <div class="field-desc">Leesbare omschrijving, zichtbaar in WMS-interface</div>
+          <div class="field-source">AXI → WMS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Voorraadbeheer -->
+    <div class="section">
+      <h2>Voorraadbeheer — palletinhoud</h2>
+      <p>
+        Momenteel worden enkel stukaantallen meegegeven bij aanmelding. Voor betere logica en traceerbaarheid wordt aanbevolen om de palletinhoud uit te breiden met gewichtsgegevens. Bij dozen of blokken blijven aantallen relevant.
+      </p>
+      <p>
+        Alle velden worden aangeleverd vanuit <strong>AXI</strong> bij aanmelding van de pallet aan het WMS.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Veld</th>
+            <th>Omschrijving</th>
+            <th>Toepasselijk voor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">stuks</span></td>
+            <td>Aantal stuks op de pallet</td>
+            <td>Alle palletypes</td>
+            <td><span class="badge-current">Huidig</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">gewicht_bruto</span></td>
+            <td>Brutogewicht van de pallet (product + verpakking + pallet)</td>
+            <td>Alle palletypes</td>
+            <td><span class="badge-new">Nieuw</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">gewicht_tarra_verpakking</span></td>
+            <td>Tarra verpakkingsmateriaal</td>
+            <td>Alle palletypes</td>
+            <td><span class="badge-new">Nieuw</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">gewicht_tarra_pallet</span></td>
+            <td>Tarra van het pallettype zelf</td>
+            <td>Alle palletypes</td>
+            <td><span class="badge-new">Nieuw</span></td>
+          </tr>
+          <tr>
+            <td><span class="code">dozen_aantallen</span></td>
+            <td>Aantal dozen of blokken op de pallet</td>
+            <td>Dozen / blokken</td>
+            <td><span class="badge-new">Nieuw</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Palletgroottes -->
+    <div class="section">
+      <h2>Palletgroottes</h2>
+      <p>
+        Binnen Locks worden twee palletgroottes gebruikt. Dit wordt meegegeven bij aanmelding en is relevant voor locatiebeheer en capaciteitsberekening in het WMS.
+      </p>
+      <div class="field-grid">
+        <div class="field-card">
+          <div class="field-name">EUR</div>
+          <div class="field-desc">Europallet — 800 × 1200 mm</div>
+        </div>
+        <div class="field-card">
+          <div class="field-name">IND</div>
+          <div class="field-desc">Industriepallet — 1000 × 1200 mm</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pallettypes -->
+    <div class="section">
+      <h2>Pallettypes</h2>
+      <div class="info-block" style="border-left-color: var(--text-muted);">
+        <p>Pallettypes hoeven <strong>niet</strong> te worden geïnterfaced met het WMS. Ze hebben geen functioneel nut binnen de WMS-logica en vallen buiten de scope van de interface.</p>
+      </div>
+    </div>
+
+    <!-- CNT Statussen -->
+    <div class="section">
+      <h2>CNT-statussen</h2>
+      <p>
+        Aan CNT's (palletrecords) kunnen statussen worden toegewezen. Deze hebben elk een specifiek effect op de beschikbaarheid van de pallet binnen het WMS.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Type</th>
+            <th>Bron</th>
+            <th>Effect</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Blokkerend voor reservatie</td>
+            <td>AXI interface <em>of</em> intern WMS</td>
+            <td>Pallet kan niet worden gereserveerd voor een order</td>
+          </tr>
+          <tr>
+            <td>Blokkerend voor controle</td>
+            <td>AXI interface <em>of</em> intern WMS</td>
+            <td>Pallet vereist kwaliteits- of operationele controle voor verdere verwerking</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="note-text">
+        Statussen kunnen zowel vanuit AXI worden geïnterfaced als intern worden toegewezen door het WMS (bv. door een operator of automatische WMS-logica). Beide bronnen zijn gelijkwaardig van toepassing.
+      </p>
+    </div>
+
+    <!-- AXI Status -->
+    <div class="section">
+      <h2>AXI-status — uitgeboekte paletten</h2>
+      <p>
+        Wanneer een pallet in AXI wordt uitgeboekt (status 5), wordt deze statuswijziging via de interface doorgegeven aan het WMS. Als de betrokken pallet op dat moment gekend is in het WMS, moet dit kenbaar gemaakt worden in het systeem.
+      </p>
+      <p>
+        Het gedrag verschilt per zone:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Zone</th>
+            <th>Gedrag bij AXI uitboeking (status 5)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">LOX</span></td>
+            <td>WMS markeert de pallet als <em>foutief gestockeerd</em>. De pallet blijft op locatie staan tot ATUMIND een reactie geeft. Manuele interventie vereist.</td>
+          </tr>
+          <tr>
+            <td><span class="code">LOX_S</span></td>
+            <td>Zelfde gedrag als LOX — pallet als foutief gestockeerd, wacht op reactie van ATUMIND.</td>
+          </tr>
+          <tr>
+            <td><span class="code">LOX_M</span></td>
+            <td>Pallet mag zonder verdere bevestiging van de locatie worden verwijderd. Geen blokkering vereist.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--warn); margin-top: 16px;">
+        <p><strong>Opmerking:</strong> Voor LOX en LOX_S is een expliciete reactie van ATUMIND vereist alvorens verdere acties op de pallet kunnen worden ondernomen. Dit voorkomt dat foutief gestockeerde paletten ongecontroleerd uit het geautomatiseerde systeem worden gehaald.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+  </main>
+</div>
+<style>.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+
+  .badge-yes, .badge-no, .badge-current, .badge-new {
+    display: inline-block;
+    font-size: 10px;
+    font-family: var(--font-mono);
+    border-radius: 3px;
+    padding: 1px 6px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    font-weight: 600;
+  }
+  .badge-yes     { background: var(--green-dim); color: var(--green); }
+  .badge-no      { background: var(--surface2);  color: var(--text-muted); }
+  .badge-current { background: var(--surface2);  color: var(--text-muted); }
+  .badge-new     { background: var(--accent-dim); color: var(--accent); }
+
+  .field-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(185px, 1fr));
+    gap: 8px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+  }
+  .field-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 12px;
+    box-shadow: var(--shadow);
+  }
+  .field-name {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .field-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-top: 3px;
+  }
+  .field-source {
+    font-size: 10px;
+    font-family: var(--font-mono);
+    color: var(--text-muted);
+    margin-top: 5px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+  }
+
+  .note-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 4px;
+  }</style>
+</body>
+</html>

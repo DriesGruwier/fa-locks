@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manueel magazijn — Locatieboeking — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">07.2 · Manueel magazijn</div>
+      <h1>Locatieboeking</h1>
+      <div class="subtitle">Regels en validaties voor het boeken van paletten op locaties in LOX_M</div>
+    </div>
+
+    <div class="section">
+      <h2>Locatietypes</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Type</th><th>Capaciteit</th><th>Toelichting</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Reklocatie</td>
+            <td>1 pallet</td>
+            <td>Vaste rekpositie — slechts één pallet tegelijk boekbaar</td>
+          </tr>
+          <tr>
+            <td>Grondlocatie</td>
+            <td>Meerdere paletten</td>
+            <td>Meerdere paletten kunnen op dezelfde grondlocatie geboekt worden</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Validatieregels bij inboeken</h2>
+      <p>
+        Bij het boeken van een pallet op een locatie wordt een reeks validaties uitgevoerd. De flow stopt bij de eerste fout.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Validatie</th><th>Resultaat bij fout</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pallet staat reeds op een locatie in <span class="code">LOX</span> of <span class="code">LOX_S</span></td>
+            <td>Foutmelding — boeking niet toegestaan. Pallet bevindt zich in het geautomatiseerd systeem.</td>
+          </tr>
+          <tr>
+            <td>Pallet is onderweg (actieve taak in LOX of LOX_S)</td>
+            <td>Foutmelding — boeking niet toegestaan. Pallet heeft een actieve bewegingstaak.</td>
+          </tr>
+          <tr>
+            <td>Pallet niet gekend in WMS</td>
+            <td>WMS bevraagt AXI. Indien ook AXI de pallet niet kent → foutmelding. Indien AXI de pallet kent → pallet wordt aangemaakt in WMS en boeking wordt voortgezet.</td>
+          </tr>
+          <tr>
+            <td>Pallet al geboekt op andere locatie in <span class="code">LOX_M</span></td>
+            <td>Pallet wordt automatisch overgeboekt naar de nieuwe locatie. Oude locatie wordt vrijgegeven.</td>
+          </tr>
+          <tr>
+            <td>Reklocatie reeds bezet door andere pallet</td>
+            <td>Foutmelding — reklocatie heeft capaciteit van 1 pallet.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Uitboeken</h2>
+      <p>
+        Wanneer een pallet uit het manueel magazijn wordt weggenomen, kan de operator via de scanapplicatie de locatieboeking verwijderen. De pallet verdwijnt hiermee uit de WMS-locatieregistratie maar blijft gekend in AXI.
+      </p>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Uitboeken verwijdert enkel de <strong>fysieke locatiekoppeling</strong> in het WMS. De pallet blijft stockmatig aanwezig in AXI totdat AXI zelf de stock uitboekt.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manueel magazijn — Waarom nodig — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">07.1 · Manueel magazijn</div>
+      <h1>Waarom nodig</h1>
+      <div class="subtitle">Motivatie en context voor het manuele magazijngedeelte</div>
+    </div>
+
+    <div class="section">
+      <h2>Context</h2>
+      <p>
+        Het manueel magazijn (<span class="code">LOX_M</span>) is het gedeelte van Locks dat niet geautomatiseerd wordt bediend. Vanuit AXI/ERP-perspectief is het niet relevant waar een pallet fysiek staat binnen dit gedeelte — de stockwaarde en eigenaarschap zijn gekend in het ERP ongeacht de fysieke positie.
+      </p>
+      <p>
+        In de praktijk zorgt dit echter voor een operationeel probleem: operators en het LOX-team moeten voortdurend zoeken naar paletten in het manueel magazijn. Er is geen zichtbaarheid over waar een specifieke pallet zich bevindt.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Oplossing</h2>
+      <p>
+        Door een <strong>vrijwillige manuele locatieboeking</strong> mogelijk te maken in het WMS krijgen operators de mogelijkheid om paletten op een locatie te registreren. Dit is geen verplichting vanuit het ERP, maar een operationele tool om zoekwerk te elimineren en de efficiëntie in het manueel magazijn te verhogen.
+      </p>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>De locatieboeking in <span class="code">LOX_M</span> heeft geen impact op de ERP-stockwaarde of eigenaarschap in AXI. Het is puur een intern WMS-hulpmiddel voor fysieke traceerbaarheid.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Locaties in het manueel magazijn</h2>
+      <p>Het manueel magazijn bevat twee types locaties:</p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Type</th><th>Aantal</th><th>Capaciteit</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Reklocaties</td>
+            <td>± 60</td>
+            <td>1 pallet per locatie</td>
+          </tr>
+          <tr>
+            <td>Grondlocaties</td>
+            <td>Enkele</td>
+            <td>Meerdere paletten per locatie mogelijk</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>Alle locaties worden gedefinieerd en beheerd in het WMS.</p>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

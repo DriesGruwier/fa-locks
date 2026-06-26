@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Dashboards & rapportering — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.6 · Shock</div>
+      <h1>Dashboards &amp; rapportering</h1>
+      <div class="subtitle">Real-time opvolging en historische rapportering van de shockvriezer</div>
+    </div>
+
+    <div class="section">
+      <h2>Dashboard — huidige status</h2>
+      <p>
+        Het statusdashboard geeft een real-time overzicht van de toestand van de shockvriezer. De volgende widgets worden weergegeven:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Widget</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Paletten aanwezig</strong></td>
+            <td>Totaal aantal paletten dat zich momenteel in de shockvriezer bevindt</td>
+          </tr>
+          <tr>
+            <td><strong>Klaar voor uitname</strong></td>
+            <td>Aantal paletten met status <span class="code">DIEPVRIES</span> die op dit moment kunnen worden uitgehaald</td>
+          </tr>
+          <tr>
+            <td><strong>Voorspelde outboundduur</strong></td>
+            <td>Geschatte tijd die nodig is om alle uithaalklare paletten uit te bounden op basis van huidige capaciteit en snelheid</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Dashboard — taakoverzicht uithaalopdracht</h2>
+      <p>
+        Tijdens een actieve uithaalopdracht wordt een gedetailleerd taakoverzicht weergegeven. Dit toont de voortgang van de lopende opdracht:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Kolom</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Gewenst</strong></td>
+            <td>Totaal aantal paletten dat voor deze opdracht uitgehaald moet worden</td>
+          </tr>
+          <tr>
+            <td><strong>Afgewerkt</strong></td>
+            <td>Aantal paletten dat reeds succesvol uitgehaald is</td>
+          </tr>
+          <tr>
+            <td><strong>In uitvoering</strong></td>
+            <td>Aantal paletten waarvoor een uithaaltaak momenteel actief is</td>
+          </tr>
+          <tr>
+            <td><strong>Resterend</strong></td>
+            <td>Aantal paletten dat nog niet gestart is (gewenst − afgewerkt − in uitvoering)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Dashboard — uithaalplanning</h2>
+      <p>
+        De uithaalplanning geeft een chronologisch overzicht van alle paletten gesorteerd op <strong>voorspelde diepvriestijd</strong>. Dit laat operatoren en planners toe de verwachte uithaalmomenten vooruit te zien en de workload in te schatten.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Kolom</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">voorspelde_diepvriestijd</span></td>
+            <td>Verwacht tijdstip waarop de pallet uithaalklaar is</td>
+          </tr>
+          <tr>
+            <td>Product / variant</td>
+            <td>Product en variant van de pallet</td>
+          </tr>
+          <tr>
+            <td>SSCC</td>
+            <td>Identificatie van de pallet</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>Huidige status van de pallet (<span class="code">INVRIES</span> / <span class="code">DIEPVRIES</span>)</td>
+          </tr>
+          <tr>
+            <td>Locatie</td>
+            <td>Huidige locatie in de shockvriezer (level, lane, positie)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Rapportering</h2>
+      <p>
+        De rapporteringsmodule laat toe historische data per dag op te vragen. De gebruiker selecteert een datum en krijgt een overzicht van de inbound- en outboundactiviteit voor die dag.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Rapport</th><th>Granulariteit</th><th>Beschikbare waarden</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Inbound per dag</strong></td>
+            <td>Per dag selecteerbaar</td>
+            <td>Aantal paletten ingebounded · Totaal gewicht (kg)</td>
+          </tr>
+          <tr>
+            <td><strong>Outbound per dag</strong></td>
+            <td>Per dag selecteerbaar</td>
+            <td>Aantal paletten uitgebounded · Totaal gewicht (kg)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

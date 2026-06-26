@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silo — Scanapplicatie — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">06.8 · Silo</div>
+      <h1>Scanapplicatie</h1>
+      <div class="subtitle">Scanflow voor beladingsbevestiging en interne palletbewegingen</div>
+    </div>
+
+    <div class="section">
+      <h2>Uitgangspunt</h2>
+      <p>
+        In de huidige scanapplicatie dient de operator eerst een order te selecteren en daarna een CNT te scannen. Dit vereist dat de operator weet welk order een pallet toebehoort — wat bij door-elkaar-laden niet werkbaar is.
+      </p>
+      <p>
+        In het nieuwe systeem wordt de flow omgekeerd: de operator scant eerst de <strong>CNT of opnamepositie</strong>. Het systeem bepaalt vervolgens zelf wat er met de pallet moet gebeuren en geeft instructie aan de operator.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Scanflow</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Operator scant CNT-nummer of opnamepositie</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Systeem zoekt de pallet op en bepaalt de bestemming op basis van actieve taken en ordertoewijzing</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Scanapplicatie toont instructie aan operator: bestemming (locatie of laadpoort)</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Operator brengt pallet naar bestemming en bevestigt via scan</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Systeem valideert en rondt de beweging definitief af</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Interne beweging</h2>
+      <p>
+        Bij een interne palletbeweging (bv. tussenpositie, reshuffeling, ordervoorbereiding) bevestigt de operator de pallet op de doellocatie via scan. Het systeem detecteert de pallet op die locatie en verwerkt de beweging.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Verlading aan laadpoort</h2>
+      <p>
+        Bij verlading in een vrachtwagen scant de operator de laadpoort. Het systeem controleert of de gescande pallet voor die poort bestemd is.
+      </p>
+
+      <h3>AXI-validatie</h3>
+      <p>
+        Voor definitieve bevestiging van een verlading wordt een <strong>API-call naar AXI</strong> uitgevoerd ter validatie. Pas na een positieve bevestiging vanuit AXI wordt de verlading definitief verwerkt in het WMS.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Scenario</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pallet correct voor deze poort + AXI ok</td>
+            <td>Verlading bevestigd — beweging definitief verwerkt in WMS en AXI</td>
+          </tr>
+          <tr>
+            <td>Pallet niet bestemd voor deze poort</td>
+            <td>Foutmelding — operator krijgt correcte bestemming te zien</td>
+          </tr>
+          <tr>
+            <td>AXI-validatie negatief of niet bereikbaar</td>
+            <td>Verlading geblokkeerd — operator krijgt melding, geen definitieve bevestiging mogelijk</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Optioneel — signaalverlichting aan laadpoort</h2>
+      <p>
+        Optioneel kunnen aan elke laadpoort groen en rood signaallichten worden geplaatst die in de vrachtwagen schijnen. Dit geeft de chauffeur en lader een onmiddellijke visuele bevestiging zonder naar het scherm te kijken.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Situatie</th><th>Signaal</th><th>Duur</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Correcte poort gescand — verlading ok</td>
+            <td><span class="color-dot" style="background:#22c55e"></span> <strong>Groen licht</strong></td>
+            <td>Blijft branden zolang actief order loopt</td>
+          </tr>
+          <tr>
+            <td>Foute poort gescand</td>
+            <td><span class="color-dot" style="background:#ef4444"></span> <strong>Rood licht</strong></td>
+            <td>5 seconden</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+  .color-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+</style>
+
+</body>
+</html>

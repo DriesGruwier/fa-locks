@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stock sync — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="css/style.css">
+<script src="js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">08 · Stock sync</div>
+      <h1>Stock sync</h1>
+      <div class="subtitle">Nachtelijke stocksynchronisatie tussen AXI en ATUMIND</div>
+    </div>
+
+    <div class="section">
+      <h2>Doel</h2>
+      <p>
+        Elke nacht wordt een stocksynchronisatie uitgevoerd tussen AXI en ATUMIND. Dit zorgt ervoor dat de stockgegevens in het WMS overeenkomen met de stockwerkelijkheid in het ERP en dat afwijkingen tijdig worden opgespoord.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Werking</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Nachtelijke job wordt getriggerd op instelbaar tijdstip</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>WMS vergelijkt de eigen stockregistratie met de stockgegevens uit AXI</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Overeenkomsten worden bevestigd — geen actie vereist</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Afwijkingen worden geregistreerd in de logging</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Resultaat van de sync (succesvol / aantal fouten) wordt opgeslagen per dag</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Logging van fouten</h2>
+      <p>
+        Afwijkingen die tijdens de sync worden gevonden worden geregistreerd in een foutlog. Dit laat toe om afwijkingen achteraf te analyseren en op te lossen.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Logveld</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Datum sync</td>
+            <td>Datum waarop de sync werd uitgevoerd</td>
+          </tr>
+          <tr>
+            <td>CNT / SSCC</td>
+            <td>Betrokken pallet waarvoor een afwijking werd vastgesteld</td>
+          </tr>
+          <tr>
+            <td>WMS-waarde</td>
+            <td>Stockgegeven zoals gekend in ATUMIND</td>
+          </tr>
+          <tr>
+            <td>AXI-waarde</td>
+            <td>Stockgegeven zoals gekend in AXI</td>
+          </tr>
+          <tr>
+            <td>Type afwijking</td>
+            <td>Omschrijving van het verschil (bv. pallet gekend in WMS maar niet in AXI, afwijkend gewicht, …)</td>
+          </tr>
+          <tr>
+            <td>Status</td>
+            <td>Openstaand / in onderzoek / opgelost</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p>Geregistreerde fouten worden <strong>niet automatisch gecorrigeerd</strong>. Ze dienen manueel onderzocht en opgelost te worden door de verantwoordelijke. De logging dient als werklist voor opvolging.</p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

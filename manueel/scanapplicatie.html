@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manueel magazijn — Scanapplicatie — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">07.3 · Manueel magazijn</div>
+      <h1>Scanapplicatie</h1>
+      <div class="subtitle">Scanflow voor locatieboeking en uitboeken in het manueel magazijn</div>
+    </div>
+
+    <div class="section">
+      <h2>Inboeken op locatie</h2>
+      <p>
+        Via de scanapplicatie kan een operator een pallet op een locatie in <span class="code">LOX_M</span> registreren. De flow is als volgt:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Operator scant het CNT-nummer van de pallet</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>
+              Systeem valideert de pallet:<br>
+              — Staat pallet in <span class="code">LOX</span> of <span class="code">LOX_S</span> op een locatie of onderweg? → Foutmelding, flow stopt<br>
+              — Pallet onbekend in WMS? → AXI bevraagd. Niet gevonden in AXI → foutmelding. Gevonden → aangemaakt in WMS, flow verder<br>
+              — Pallet al geboekt in <span class="code">LOX_M</span> → melding aan operator, overboeking naar nieuwe locatie na bevestiging
+            </td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Operator scant de doellocatie (rek of grond)</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Systeem valideert locatie (reklocatie vol? → foutmelding)</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>Boeking bevestigd — pallet gekoppeld aan locatie in WMS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Uitboeken</h2>
+      <p>
+        Wanneer een pallet fysiek wordt weggenomen uit het manueel magazijn kan de operator de locatieboeking verwijderen:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>Operator scant het CNT-nummer van de pallet</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Systeem toont de huidige locatie en palletinfo</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Operator drukt op <strong>Uitboeken / Wegnemen</strong></td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Locatiekoppeling wordt verwijderd uit het WMS — pallet heeft geen locatie meer in <span class="code">LOX_M</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Uitboeken verwijdert enkel de fysieke locatiekoppeling in het WMS. De stockwaarde en eigenaarschap in AXI blijven ongewijzigd totdat AXI zelf uitboekt.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Palletinfo raadplegen</h2>
+      <p>
+        De scanapplicatie kan ook puur informatief gebruikt worden. Door een CNT te scannen zonder verdere actie toont de applicatie de huidige locatie en basispalletinfo (product/variant, SSCC, status).
+      </p>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

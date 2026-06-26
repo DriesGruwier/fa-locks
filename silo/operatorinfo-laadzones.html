@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silo — Operatorinfo laadzones — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">06.6 · Silo</div>
+      <h1>Operatorinfo laadzones</h1>
+      <div class="subtitle">Informatieweergave aan de afnameposities van de conveyor</div>
+    </div>
+
+    <div class="section">
+      <h2>Concept</h2>
+      <p>
+        Optioneel worden schermen geplaatst aan de drie conveyor-afnameposities (<span class="code">PALLET</span>, <span class="code">PUSHPULL</span>, <span class="code">REJECT</span>). Wanneer een pallet op de conveyor wordt bevestigd door het DGS-conveyorsysteem, haalt het scherm automatisch de palletinfo op uit het WMS en toont de operator de relevante informatie en bestemming.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Trigger &amp; gegevensstroom</h2>
+      <p>
+        De weergave wordt getriggerd door een event vanuit het <strong>DGS-conveyorsysteem</strong> dat bevestigt dat een pallet aanwezig is op de afnamepositie. Op basis van het palletnummer wordt de informatie opgezocht in het WMS.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>DGS bevestigt pallet aanwezig op afnamepositie — palletnummer beschikbaar</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>WMS zoekt pallet op via palletnummer</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>Scherm toont palletinfo en bestemming aan operator</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Weergave per scenario</h2>
+      <table class="data-table">
+        <thead>
+          <tr><th>Scenario</th><th>Weergave op scherm</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Pallet gekoppeld aan een laadkaai</td>
+            <td>Palletinfo (SSCC, product/variant) + kaaiaanduiding als bestemming</td>
+          </tr>
+          <tr>
+            <td>Pallet gekoppeld aan intern order</td>
+            <td>Palletinfo (SSCC, product/variant) + intern order als bestemming</td>
+          </tr>
+          <tr>
+            <td>Pallet gekend, geen actieve taak</td>
+            <td>Palletinfo (SSCC, product/variant) + melding <strong>"Geen taak — bestemming onbekend"</strong></td>
+          </tr>
+          <tr>
+            <td>Pallet onbekend in WMS</td>
+            <td>Melding <strong>"Onbekende pallet"</strong> — geen verdere info beschikbaar</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Discussiepunt — betrouwbaarheid DGS-data</h2>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p>
+          <strong>Open discussiepunt.</strong> De volledige werking van deze schermen staat of valt met de nauwkeurigheid van de palletnummers aangeleverd door het DGS-conveyorsysteem. Als DGS een foutief of ontbrekend palletnummer doorstuurt, kan het WMS geen correcte info tonen.
+        </p>
+        <p style="margin-top:8px;">
+          Er dient besproken te worden of op de afnameposities alsnog <strong>automatische scanners</strong> worden geplaatst als fallback of primaire identificatiemethode, zodat het palletnummer onafhankelijk van DGS betrouwbaar beschikbaar is.
+        </p>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>

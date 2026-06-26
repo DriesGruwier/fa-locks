@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Excepties — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.7 · Shock</div>
+      <h1>Excepties</h1>
+      <div class="subtitle">Afhandeling van uitzonderingen en foutscenario's in de shockvriezer</div>
+    </div>
+
+    <div class="section">
+      <h2>No read bij inbound</h2>
+      <p>
+        Wanneer een pallet bij inbound niet leesbaar is (barcode no read), kan dit in het nieuwe WCS lokaal worden opgelost zonder de pallet te rejecten. De operator krijgt de mogelijkheid om het SSCC-nummer manueel in te geven waarna de normale inboundflow verder wordt gezet.
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>No read gedetecteerd — WCS onderbreekt de inboundflow en toont melding aan operator</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>Operator geeft het SSCC-nummer manueel in via het scherm</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>WCS valideert het SSCC — indien bekend wordt de normale inboundflow hervat</td>
+          </tr>
+          <tr>
+            <td>4 (fallback)</td>
+            <td>Indien het SSCC onbekend is of de operator de pallet niet kan identificeren, kan de operator bevestigen dat de pallet toch gereject mag worden. De pallet wordt via de rejectflow naar buiten gestuurd.</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--warn);">
+        <p>De rejectflow gebruikt dezelfde conveyor als de productiestroom. Beide kunnen niet gelijktijdig actief zijn — het WCS houdt hier rekening mee bij het initiëren van de rejectflow.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Lane full</h2>
+      <p>
+        Wanneer het MOVU-systeem een <em>lane full</em> melding geeft, wordt dit in de huidige situatie administratief manueel opgelost. In het nieuwe WCS wordt dit automatisch afgehandeld:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Stap</th><th>Actie</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>MOVU geeft lane full melding</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>WCS zet de betrokken lane op status <span class="code">INBOUND BLOCKED</span></td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>WCS bepaalt automatisch een nieuwe inboundlocatie en stuurt een update naar MOVU</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Inboundflow wordt hervat op de nieuwe locatie</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        Het vrijgeven van de <span class="code">INBOUND BLOCKED</span> status is instelbaar via een parameter:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Parameter</th><th>Waarde</th><th>Gedrag</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">lane_blocked_vrijgave</span></td>
+            <td><span class="code">AUTOMATISCH</span></td>
+            <td>WCS verwijdert de blocked status automatisch zodra de lane opnieuw beschikbaar is</td>
+          </tr>
+          <tr>
+            <td><span class="code">lane_blocked_vrijgave</span></td>
+            <td><span class="code">MANUEEL</span></td>
+            <td>Operator dient de blocked status expliciet te bevestigen en weg te nemen via het scherm</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Deze parameter is instelbaar door de key-user via de WMS-instellingen.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>No loads found in lane</h2>
+      <p>
+        Wanneer het systeem geen paletten vindt in een lane waar dit wel verwacht wordt, krijgt de operator een duidelijke foutmelding met drie actiemogelijkheden:
+      </p>
+      <div class="action-grid">
+        <div class="action-card action-retry">
+          <div class="action-label">Retry</div>
+          <div class="action-desc">Systeem probeert de operatie opnieuw uit te voeren op dezelfde lane</div>
+        </div>
+        <div class="action-card action-confirm">
+          <div class="action-label">Bevestigen</div>
+          <div class="action-desc">Operator bevestigt dat de lane effectief leeg is — WCS past de administratie aan</div>
+        </div>
+        <div class="action-card action-cancel">
+          <div class="action-label">Annuleren</div>
+          <div class="action-desc">Operatie wordt geannuleerd — lane blijft in huidige status, geen verdere actie</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .action-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 12px;
+  }
+  .action-card {
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+  }
+  .action-label {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .action-desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .action-retry    { background: #eff6ff; border-top: 3px solid #3b82f6; }
+  .action-retry .action-label { color: #2563eb; }
+  .action-confirm  { background: #f0fdf4; border-top: 3px solid #22c55e; }
+  .action-confirm .action-label { color: #16a34a; }
+  .action-cancel   { background: #fff7ed; border-top: 3px solid #f59e0b; }
+  .action-cancel .action-label { color: #d97706; }
+</style>
+
+</body>
+</html>

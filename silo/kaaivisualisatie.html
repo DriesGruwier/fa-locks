@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Silo — Kaaivisualisatie — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">06.5 · Silo</div>
+      <h1>Kaaivisualisatie</h1>
+      <div class="subtitle">Visuele weergave van laadkaaien, tussenposities en conveyor-afname</div>
+    </div>
+
+    <div class="section">
+      <h2>Lay-out visualisatie</h2>
+      <p>
+        De kaaivisualisatie toont een schematische weergave van de volledige laadzone van Locks. De volgende elementen zijn weergegeven:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Element</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Laadkaaien</td>
+            <td>Alle laadkaaien van Locks, elk met hun huidige orderstatus en bezetting</td>
+          </tr>
+          <tr>
+            <td>Conveyor-afnameposities</td>
+            <td>
+              De drie vaste afnameposities waar paletten van de conveyor worden overgenomen:<br>
+              <span class="code">PALLET</span> — standaard palletafname<br>
+              <span class="code">PUSHPULL</span> — afname via pushpull mechanisme<br>
+              <span class="code">REJECT</span> — rejectpositie voor geweigerde paletten
+            </td>
+          </tr>
+          <tr>
+            <td>Globale tussenposities</td>
+            <td>Vaste bufferposities in de laadzone waar paletten tijdelijk kunnen worden geplaatst voor manipulatie, zonder bevestiging van belading. Niet gebonden aan een specifieke kaai.</td>
+          </tr>
+          <tr>
+            <td>Afgewerkte orders</td>
+            <td>Afgesloten orders worden visueel naar een afgewerkte zone versleept. Deze zone kan meerdere afgewerkte orders bevatten.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="section">
+      <h2>Tussenposities</h2>
+      <p>
+        Tussenposities zijn globale bufferlocaties in de laadzone. Ze worden gebruikt wanneer een pallet tijdelijk ergens moet worden neergezet voor manipulatie — zonder dat dit als een bevestigde belading wordt geregistreerd. Ze zijn niet gekoppeld aan een specifieke kaai en kunnen door alle operators worden gebruikt.
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>Orderbeheer via kaaivisualisatie</h2>
+
+      <h3>Order toewijzen aan kaai</h3>
+      <p>
+        Een order wordt geïnitieerd door het toe te wijzen aan een laadkaai en te starten vanuit de visualisatie. Per kaai kan maximaal <strong>één actief order</strong> tegelijk lopen.
+      </p>
+      <div class="info-block" style="border-left-color: var(--red);">
+        <p>Als een kaai reeds een actief order heeft, wordt een nieuw order <strong>geweigerd</strong>. Het nieuwe order dient aan een andere kaai of op een later tijdstip te worden toegewezen.</p>
+      </div>
+
+      <h3>Orderopvolging</h3>
+      <p>
+        Via de kaaivisualisatie is de voortgang van elk actief order zichtbaar: hoeveel paletten er reeds beladen zijn t.o.v. het totaal. Door op een order te klikken opent een detailweergave met:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Informatie</th><th>Omschrijving</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Beladingsstatus</td>
+            <td>Aantal reeds bevestigd belaadde paletten vs. totaal gewenst</td>
+          </tr>
+          <tr>
+            <td>Palletten in beweging</td>
+            <td>Overzicht van paletten die momenteel onderweg zijn naar de kaai (status per pallet)</td>
+          </tr>
+          <tr>
+            <td>Palletten op tussenposities</td>
+            <td>Paletten die tijdelijk op een tussenpositie staan in afwachting van manipulatie</td>
+          </tr>
+          <tr>
+            <td>Orderlijnen</td>
+            <td>Per orderlijn de voortgang van reservatie en uitvoering</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h3>Order afsluiten</h3>
+      <p>
+        Wanneer een order volledig is afgehandeld wordt het afgesloten en visueel naar de <strong>afgewerkte zone</strong> versleept op de kaaiweergave. De afgewerkte zone kan meerdere afgesloten orders bevatten en dient als historisch overzicht van de afgeronde beladingen.
+      </p>
+
+      <h3>Beladingsbevestiging</h3>
+      <p>
+        De effectieve bevestiging van paletten in de vrachtwagen gebeurt via de <strong>scanapplicatie</strong> (zie 06.8). De kaaivisualisatie toont de beladingsstatus real-time op basis van de bevestigingen uit de scanapplicatie.
+      </p>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  h3 {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+</style>
+
+</body>
+</html>

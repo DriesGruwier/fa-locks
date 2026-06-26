@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shock — Extra info AXI — FA WMS/WCS Locks</title>
+<link rel="stylesheet" href="../css/style.css">
+<script src="../js/nav.js" defer></script>
+</head>
+<body>
+<div class="layout">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main">
+
+    <div class="page-header">
+      <div class="eyebrow">05.5 · Shock</div>
+      <h1>Extra info AXI</h1>
+      <div class="subtitle">Aanvullende AXI-gegevens specifiek voor de shockvriezer</div>
+    </div>
+
+    <div class="section">
+      <h2>CNT-niveau — per pallet</h2>
+      <p>
+        Naast de algemene palletdata worden voor paletten in de shockvriezer de volgende bijkomende velden verwacht vanuit AXI bij aanmelding:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Veld</th><th>Type</th><th>Omschrijving</th><th>Bron</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">diepvries_status</span></td>
+            <td>Enum</td>
+            <td>
+              Status van het invriesproces.<br>
+              <span class="code">INVRIES</span> — pallet is nog aan het invriezen<br>
+              <span class="code">DIEPVRIES</span> — pallet is volledig bevroren en klaar voor verdere verwerking
+            </td>
+            <td>AXI → WMS</td>
+          </tr>
+          <tr>
+            <td><span class="code">voorspelde_diepvriestijd</span></td>
+            <td>Datum/tijd</td>
+            <td>Verwacht tijdstip waarop de pallet de status <span class="code">DIEPVRIES</span> bereikt. Wordt gebruikt als basis voor tijdsvensterlogica en batchingprioriteit.</td>
+            <td>AXI → WMS</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="info-block" style="border-left-color: var(--accent);">
+        <p>Voor paletten met status <span class="code">DIEPVRIES</span> bij aanmelding wordt de <strong>voorspelde diepvriestijd gelijkgesteld aan het huidige moment</strong>, zodat ze onmiddellijk in het eerste tijdsvenster vallen en direct kunnen worden voorbereid voor outbound.</p>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Product/variant-niveau</h2>
+      <p>
+        Op het niveau van product/variant dient het WMS de volgende parameters te kennen voor een correcte batchings- en opstapelingslogica. Deze worden geïnterfaced vanuit AXI op productniveau:
+      </p>
+      <table class="data-table">
+        <thead>
+          <tr><th>Veld</th><th>Type</th><th>Omschrijving</th><th>Bron</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="code">max_dozen</span></td>
+            <td>Geheel getal</td>
+            <td>Maximum aantal dozen waartoe een eindpallet voor dit product/variant mag worden opgestapeld.</td>
+            <td>AXI → WMS</td>
+          </tr>
+          <tr>
+            <td><span class="code">max_gewicht</span></td>
+            <td>Decimaal (kg)</td>
+            <td>Maximaal toegestaan gewicht van de eindpallet voor dit product/variant. Wordt nooit overschreden bij batching.</td>
+            <td>AXI → WMS</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="doc-footer">
+      <span>FA · WMS/WCS Locks · Belgian Pork Group</span>
+      <span>v0.1 · intern document</span>
+    </div>
+
+  </main>
+</div>
+
+<style>
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 12px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+  }
+  .data-table th {
+    background: var(--surface2);
+    color: var(--text-dim);
+    font-size: 11px;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    padding: 8px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  .data-table td {
+    padding: 9px 12px;
+    color: var(--text-dim);
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    line-height: 1.7;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--surface2); }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 1px 6px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+</style>
+
+</body>
+</html>
