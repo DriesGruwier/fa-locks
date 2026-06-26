@@ -447,3 +447,21 @@ strong { color: var(--text); font-weight: 600; }
   font-size: 12px;
   font-family: var(--font-mono);
 }
+
+/* ── Utterances opmerkingen ── */
+.utterances-section {
+  margin-top: 40px;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+}
+.utterances-section .utterances-label {
+  font-size: 11px;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  margin-bottom: 12px;
+}
+.utterances {
+  max-width: 100% !important;
+}
