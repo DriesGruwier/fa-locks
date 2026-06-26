@@ -162,7 +162,12 @@ function injectOpmerkingPanel() {
       </div>
     </div>
   `;
-  main.appendChild(panel);
+  const footer = main.querySelector(".doc-footer");
+  if (footer) {
+    main.insertBefore(panel, footer);
+  } else {
+    main.appendChild(panel);
+  }
 
   const toggle = panel.querySelector('#opm-toggle');
   const body = panel.querySelector('#opm-body');
