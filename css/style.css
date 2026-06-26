@@ -465,3 +465,10 @@ strong { color: var(--text); font-weight: 600; }
 .utterances {
   max-width: 100% !important;
 }
+
+/* ── Opmerkingen form footer ── */
+.opm-form-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
